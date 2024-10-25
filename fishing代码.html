@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钓鱼小游戏</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <script>
+        let sea, fish, cutegirl, lines;
+
+let x = 0;
+
+let fishs = [];
+
+let line_show = false;
+let line_height = 100;
+
+let num_baits = 10;
+let num_fishs = 0;
+
+let flag_sence = 0;
+
+let get, notget, down;
+
+
+function preload() {
+  get = loadSound('./diaoyu/woo.wav')
+  notget = loadSound('./diaoyu/not get.wav')
+  down = loadSound('./diaoyu/down.wav')
+  
+  sea = loadImage("./diaoyu/sea.png")
+  fish = loadImage("./diaoyu/fish.png")
+  cutegirl = loadImage("./diaoyu/cutegirl.png")
+  lines = loadImage("./diaoyu/line.png")
+}
+
+
+function setup() {
+  createCanvas(600, 700);
+
+  for(let i = 0; i < 10; i++){
+    fishs.push({
+      x: random(0, width / 2),
+      y: random(360, height),
+      speed: random(1, 5)
+    })
+  }
+}
+
+function draw() {
+  background(220);
+  
+  if(flag_sence === 0){
+    textSize(32)
+    fill(255, 255, 0);
+    text("Start", width / 2 - 30, height / 2) 
+  }else if(flag_sence === 1) {
+   image(sea, 0, 0, width, height)
+
+   let caughtFish = false;
+    
+  for(let i = 0; i < fishs.length; i++) {
+    fishs[i].x = fishs[i].x+fishs[i].speed
+    image(fish, fishs[i].x, fishs[i].y, 60, 50)
+  }  
+  
+  
+  for(let i = 0; i < fishs.length; i++) {
+    if(fishs[i].x > width + 60) {
+      fishs.splice(i, 1)   // 把鱼删除掉
+      fishs.push({
+        x: random(0, width / 2),
+        y: random(360,height),
+        speed:random(1,5)
+      })
+    }
+
+    
+    if(crash(fishs[i].x, fishs[i].y, 60, 50, 485, 225, line_height)){
+      num_fishs++;
+      fishs.splice(i, 1);   // 把鱼删除掉
+      get.play();
+      caughtFish = true;
+      fishs.push({
+        x: random(0, width / 2),
+        y: random(360,height),
+        speed:random(1,5)
+      })
+      
+    }
+  }
+  
+  image(cutegirl, 480, 150, 100, 100)
+  
+  if(line_show) {
+    line_height += 15;
+    image(lines, 485, 225, 2, line_height);
+    if(line_height > 500){
+      line_height = 100;
+      line_show = false;
+      if(!caughtFish) {
+        notget.play();
+      }
+    }
+  }
+  
+  
+  textSize(25)
+  fill(2023, 11, 25);
+  text("number of baits:" + num_baits, 0, 30)
+    
+  text("number of fishes:" + num_fishs, 300, 30)
+  }else if(flag_sence === 2){
+    textSize(32)
+    fill(255, 255, 0);
+    text("Game Over", width / 2 - 60, height / 2)
+  }
+}
+
+function keyPressed() {
+  if (keyCode === 32) {
+    if (num_baits > 0) {
+      num_baits--;
+      line_show = true;
+      down.play();
+    } else {
+      flag_sence = 2;
+    }
+  }
+  
+  console.log(keyCode)
+  if(flag_sence === 0 && keyCode === 13){
+    flag_sence = 1;
+  }
+}
+
+
+
+function crash(fishX, fishY, fishW, fishH, lineX, lineY, lineH){
+  if(lineX + 2 > fishX && lineX + 2 < fishX + fishW && lineY + lineH < fishY + fishH && lineY + lineH > fishY){
+    return true
+  }
+  return false
+ }
+    </script>
+</body>
+</html>
